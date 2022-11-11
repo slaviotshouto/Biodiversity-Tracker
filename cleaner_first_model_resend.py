@@ -143,7 +143,7 @@ for n_iterations in range(1, 30):
     y_test = np.array(y2)
 
     # test the model
-    knn = KNeighborsClassifier(n_neighbors=5).fit(X_train, y_train)
+    knn = KNeighborsClassifier(n_neighbors=7).fit(X_train, y_train)
     # random.shuffle(X_test)
     y_pred = knn.predict(X_test)
 
@@ -166,7 +166,7 @@ plt.ylabel("accuracy")
 # %%
 # the same preprocessing, cheking every 5 pixel in phtoto
 
-n_iterations = 5
+n_iterations = 12
 step = 5
 
 X = []
@@ -215,7 +215,7 @@ for i in range(1):
 
     X_test = np.array(newt)
 
-    print("Iteration", n_iterations, ": data ready")
+    print("Data ready")
 
     # set y_train as an array of bird names repeated n_iteration times
     y = names.copy()
@@ -231,7 +231,7 @@ for i in range(1):
 # Logistic regression
 from sklearn.linear_model import LogisticRegression
 
-lr = LogisticRegression().fit(X_train, y_train)
+lr = LogisticRegression(max_iter=1000).fit(X_train, y_train)
 y_pred = lr.predict(X_test)
 print("Logistic regreession accuracy:", accuracy_score(y_test, y_pred))
 
@@ -256,12 +256,21 @@ print("SVM accuracy:", accuracy_score(y_test, y_pred))
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV
 
-param_grid_rf = {'max_depth': [1, 3, 5, 7, 9]}
+param_grid_rf = {
+    'max_depth': [7, 11, 15, 19, 23]}
 grid_search_rf = GridSearchCV(RandomForestClassifier(), param_grid_rf, cv=5)
 grid_search_rf.fit(X_train, y_train)
 
 y_pred = grid_search_rf.predict(X_test)
+
+# %%
+from sklearn.metrics import accuracy_score, f1_score, precision_score
+import pandas as pd
+
 print("Random Forest accuracy:", accuracy_score(y_test, y_pred))
+print("Random Forest precision:", precision_score(y_test, y_pred, average='micro'))
+print("Random Forest F1 score: ", f1_score(y_test, y_pred, average='micro'))
+print(grid_search_rf.best_params_)
 
 # %%
 # random check
@@ -269,44 +278,37 @@ from math import floor
 import random
 
 random = floor(random.random() * 400)
-X_train = np.array(combined)
 
 # set X_test as an array one picture of every bird from test set
 target_class = names_test[random]
 target_folder = dirs[2] + "/" + target_class
 image = Image.open(target_folder + "/" + arr_test[random][0])
 print(names_test[random])
-image.show()
+# image.show()
 data = asarray(image)
 Xt.append(data)
 
 X_arrt = np.array(Xt)
 
 newt = []
-for i in range(X_arrt.shape[0]):
-    x = []
-    for j in range(0, X_arrt.shape[1], step):
-        for k in range(0, X_arrt.shape[2], step):
-            for l in range(X_arr.shape[3]):
-                x.append(X_arr[i][j][k][l])
-    newt.append(x)
-
-X_test = np.array(newt)
-
-print("Iteration", n_iterations, ": data ready")
-
-# set y_train as an array of bird names repeated n_iteration times
-y = names.copy()
-y_train = np.array(y)
+x = []
+for j in range(0, X_arrt.shape[1], step):
+    for k in range(0, X_arrt.shape[2], step):
+        for l in range(X_arr.shape[3]):
+            x.append(X_arr[0][j][k][l])
+newt.append(x)
+X_random_test = np.array(newt)
 
 # set y_train as an array of bird names
 y2 = names_test[random]
 y_test = np.array(y2)
 
 # Showing random picture
-y_lr = lr.predict(X_test)
-print("Logistic Regression prediction: ", y_lr)
-y_svm = lr.predict(X_test)
-print("SVM prediction: ", y_svm)
-y_rf = grid_search_rf.predict(X_test)
-print("SVM prediction: ", y_rf)
+rf = RandomForestClassifier(max_depth=19)
+rf.fit(X_train, y_train)
+
+# %%
+# Showing random picture
+y_rf = grid_search_rf.predict(X_random_test)
+print("Random Forest prediction: ", y_rf)
+# print(len(y_rf), len(X_train), len(X_random_test), X_arrt.shape)
