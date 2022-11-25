@@ -34,6 +34,10 @@ val_data = generate(val_dir)
 test_data = generate(test_dir)
 
 # %%
+import pandas as pd
+results = {'Predictions': []}
+
+# %%
 model_V2 = tf.keras.models.load_model('good_V2_model.h5')
 
 # %%
@@ -87,11 +91,18 @@ print( pred,  names[idx]==pred )
 
 
 # %%
-#check 100 pictures
-n = evaluation_100(model_V2)
-print( n, 'good guesses out of 100' )
+results['Predictions'].append(pred)
+df = pd.DataFrame(results)
+df.to_csv('results.csv')
 
 # %%
+import csv
+with open('results.csv', 'r') as f:
+    lines = f.readlines()
+    last_row = lines[-1]
+print(last_row)
+
+
 
 
 
