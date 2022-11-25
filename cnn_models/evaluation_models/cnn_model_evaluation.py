@@ -1,7 +1,4 @@
 # %%
-import numpy as np
-import matplotlib.image as mpimg
-import matplotlib.pyplot as plt
 import tensorflow as tf
 import os
 
@@ -25,16 +22,17 @@ def generate(dataset):
         color_mode="rgb",
         batch_size=batch_size,
         class_mode='categorical',
-        target_size=(224,224)
+        target_size=(224, 224)
     )
     return x
 
 train_data = generate(train_dir)
 val_data = generate(val_dir)
 test_data = generate(test_dir)
+print(test_data)
 
 # %%
-model_V2 = tf.keras.models.load_model('cnn_weights.h5')
+model_V2 = tf.keras.models.load_model('../../cnn_weights.h5')
 
 # %%
 model_V2.evaluate(test_data)
