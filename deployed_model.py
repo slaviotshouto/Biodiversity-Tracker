@@ -7,7 +7,7 @@ import uvicorn as uvicorn
 
 from pathlib import Path
 from sys import platform
-from fastapi import FastAPI, UploadFile
+from fastapi import FastAPI, UploadFile, File
 
 app = FastAPI()
 path = Path.cwd()
@@ -21,10 +21,12 @@ model_V2 = tf.keras.models.load_model('cnn_weights.h5')
 
 
 @app.post('/analyze_hook')
-def analyze_hook(file: UploadFile):
-    file = file.file
-    shutil.unpack_archive(file.name, os.getcwd(), 'zip')
+def analyze_hook(file: UploadFile = File(...)):
+    with open('temp.zip', 'wb') as buffer:
+        shutil.copyfileobj(file.file, buffer)
+        shutil.unpack_archive(buffer.name, os.path.join(os.getcwd(), 'temp'), 'zip')
 
+    predict_from_zip()
 
 def load_and_prep_image(filename, img_shape=224):
     img = tf.io.read_file(filename)  # read image
