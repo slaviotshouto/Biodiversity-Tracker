@@ -22,7 +22,8 @@ model_V2 = tf.keras.models.load_model('cnn_weights.h5')
 
 @app.post('/analyze_hook')
 def analyze_hook(file: UploadFile):
-    shutil.unpack_archive(file.filename, os.getcwd(), 'zip')
+    file = file.file
+    shutil.unpack_archive(file.name, os.getcwd(), 'zip')
 
 
 def load_and_prep_image(filename, img_shape=224):
