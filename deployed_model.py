@@ -3,7 +3,9 @@ import os
 import pandas as pd
 from pathlib import Path
 from sys import platform
+from fastapi import FastAPI
 
+app = FastAPI()
 path = Path.cwd()
 
 if "win" in platform:
@@ -12,6 +14,11 @@ else:
     directory_slashes = "//"
 
 model_V2 = tf.keras.models.load_model('cnn_weights.h5')
+
+
+@app.post('/analyze_hook')
+def analyze_hook(req: dict):
+    print("THAT'S GREAT", req)
 
 
 def load_and_prep_image(filename, img_shape=224):
@@ -35,26 +42,27 @@ def predict(model, filename, class_names):
     return pred_class
 
 
-temp_folder = str(path) + f"{directory_slashes}temp"
-cl_names = os.listdir(os.getcwd() +
-                      directory_slashes + 'cnn_models' +
-                      directory_slashes + 'evaluation_models' +
-                      directory_slashes + 'test')
-results_dic = {}
-results_list = []
-files = os.listdir(temp_folder)
-print(files)
+def predict_from_zip():
+    temp_folder = str(path) + f"{directory_slashes}temp"
+    cl_names = os.listdir(os.getcwd() +
+                          directory_slashes + 'cnn_models' +
+                          directory_slashes + 'evaluation_models' +
+                          directory_slashes + 'test')
+    results_dic = {}
+    results_list = []
+    files = os.listdir(temp_folder)
+    print(files)
 
-for file in files:
-    my_file = temp_folder + f"{directory_slashes}{file}"
-    my_pred = predict(model_V2, my_file, cl_names)
-    if my_pred not in results_dic:
-        results_dic[my_pred] = 1
-    else:
-        results_dic[my_pred] += 1
+    for file in files:
+        my_file = temp_folder + f"{directory_slashes}{file}"
+        my_pred = predict(model_V2, my_file, cl_names)
+        if my_pred not in results_dic:
+            results_dic[my_pred] = 1
+        else:
+            results_dic[my_pred] += 1
 
-for k, v in results_dic.items():
-    results_list.append([k.capitalize(), v])
+    for k, v in results_dic.items():
+        results_list.append([k.capitalize(), v])
 
-df = pd.DataFrame(results_list)
-csv = df.to_csv('results.csv', index=False)
+    df = pd.DataFrame(results_list)
+    csv = df.to_csv('results.csv', index=False)
