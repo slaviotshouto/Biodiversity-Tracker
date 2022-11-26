@@ -1,11 +1,11 @@
 import tensorflow as tf
 import os
 import pandas as pd
+import uvicorn as uvicorn
+
 from pathlib import Path
 from sys import platform
-
-import uvicorn as uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile
 
 app = FastAPI()
 path = Path.cwd()
@@ -19,8 +19,8 @@ model_V2 = tf.keras.models.load_model('cnn_weights.h5')
 
 
 @app.post('/analyze_hook')
-def analyze_hook(req: dict):
-    print("THAT'S GREAT", req)
+def analyze_hook(file: UploadFile):
+    print("THAT'S GREAT", file)
 
 
 def load_and_prep_image(filename, img_shape=224):
