@@ -21,11 +21,23 @@ model_V2 = tf.keras.models.load_model('cnn_weights.h5')
 
 @app.post('/analyze_hook')
 def analyze_hook(file: UploadFile = File(...)):
-    with open('temp.zip', 'wb') as buffer:
-        shutil.copyfileobj(file.file, buffer)
-        shutil.unpack_archive(buffer.name, os.path.join(os.getcwd(), 'temp'), 'zip')
+    prediction_json = {}
 
-    return predict_from_zip()
+    try:
+        with open('temp.zip', 'wb') as buffer:
+            temp_zip_loc = buffer.name
+            shutil.copyfileobj(file.file, buffer)
+            zip_location = os.path.join(os.getcwd(), 'temp')
+            shutil.unpack_archive(buffer.name, zip_location, 'zip')
+
+            prediction_json = predict_from_zip()
+    finally:
+        # Cleanup
+        for file in os.listdir(os.path.join(os.getcwd(), 'temp')):
+            os.remove(os.path.join(os.path.join(os.getcwd(), 'temp'), file))
+        os.remove(temp_zip_loc)
+
+        return prediction_json
 
 
 def load_and_prep_image(filename, img_shape=224):
@@ -65,10 +77,6 @@ def predict_from_zip():
             results_dic[my_pred] = 1
         else:
             results_dic[my_pred] += 1
-
-    # Cleanup
-    for file in os.listdir(os.path.join(os.getcwd(), 'temp')):
-        os.remove(os.path.join(os.path.join(os.getcwd(), 'temp'), file))
 
     return results_dic
 
