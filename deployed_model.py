@@ -1,3 +1,5 @@
+import shutil
+
 import tensorflow as tf
 import os
 import pandas as pd
@@ -20,7 +22,7 @@ model_V2 = tf.keras.models.load_model('cnn_weights.h5')
 
 @app.post('/analyze_hook')
 def analyze_hook(file: UploadFile):
-    print("THAT'S GREAT", file)
+    shutil.unpack_archive(file.filename, os.getcwd(), 'zip')
 
 
 def load_and_prep_image(filename, img_shape=224):
@@ -53,7 +55,6 @@ def predict_from_zip():
     results_dic = {}
     results_list = []
     files = os.listdir(temp_folder)
-    print(files)
 
     for file in files:
         my_file = temp_folder + f"{directory_slashes}{file}"
