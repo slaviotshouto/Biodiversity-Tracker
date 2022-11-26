@@ -2,7 +2,6 @@ import shutil
 
 import tensorflow as tf
 import os
-import pandas as pd
 import uvicorn as uvicorn
 
 from pathlib import Path
@@ -26,7 +25,8 @@ def analyze_hook(file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, buffer)
         shutil.unpack_archive(buffer.name, os.path.join(os.getcwd(), 'temp'), 'zip')
 
-    predict_from_zip()
+    return predict_from_zip()
+
 
 def load_and_prep_image(filename, img_shape=224):
     img = tf.io.read_file(filename)  # read image
@@ -56,7 +56,6 @@ def predict_from_zip():
                           directory_slashes + 'evaluation_models' +
                           directory_slashes + 'test')
     results_dic = {}
-    results_list = []
     files = os.listdir(temp_folder)
 
     for file in files:
@@ -67,12 +66,12 @@ def predict_from_zip():
         else:
             results_dic[my_pred] += 1
 
-    for k, v in results_dic.items():
-        results_list.append([k.capitalize(), v])
+    # Cleanup
+    for file in os.listdir(os.path.join(os.getcwd(), 'temp')):
+        os.remove(os.path.join(os.path.join(os.getcwd(), 'temp'), file))
 
-    df = pd.DataFrame(results_list)
-    csv = df.to_csv('results.csv', index=False)
+    return results_dic
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, port=8000, log_level="info")
+    uvicorn.run(app, port=7000, log_level="info")
