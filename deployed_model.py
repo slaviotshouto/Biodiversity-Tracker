@@ -3,6 +3,8 @@ import os
 import pandas as pd
 from pathlib import Path
 from sys import platform
+
+import uvicorn as uvicorn
 from fastapi import FastAPI
 
 app = FastAPI()
@@ -66,3 +68,7 @@ def predict_from_zip():
 
     df = pd.DataFrame(results_list)
     csv = df.to_csv('results.csv', index=False)
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=5000, log_level="info")
